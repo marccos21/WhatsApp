@@ -1,11 +1,20 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
 
 public class Usuario extends JFrame {
-    private JTextArea zonaChat;
+    static String nombre;
+    private static DataOutputStream out;
+    private static DataInputStream in;
+    private static JTextArea zonaChat;
     private JTextField zonaTexto;
-    public Usuario (){
-        setTitle("WhatsApp");
+    public Usuario (String name){
+        setTitle("WhatsApp: "+name);
         setSize(400, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -20,6 +29,17 @@ public class Usuario extends JFrame {
         panelChat.add(zonaTexto, BorderLayout.CENTER);
 
         JButton boton = new JButton("Enviar");
+        boton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String mensaje = zonaTexto.getText();
+                    out.writeUTF(name + ": " + mensaje);
+                    zonaTexto.setText("");
+                } catch (IOException ex) {
+                    System.out.println(ex.getMessage());
+                }
+            }
+        });
 
         panelChat.add(boton, BorderLayout.EAST);
 
@@ -30,7 +50,26 @@ public class Usuario extends JFrame {
         setVisible(true);
     }
 
-    public static void main(String[] args) {
-        Usuario u = new Usuario();
+    public static void main(String[] args) throws IOException {
+        Socket socket = new Socket("localhost", 5000);
+        out = new DataOutputStream(socket.getOutputStream());
+        in = new DataInputStream(socket.getInputStream());
+
+        nombre = JOptionPane.showInputDialog("Escribe tu nombre");
+
+        new Usuario(nombre);
+
+        new Thread(() -> {
+            try {
+                String respuesta;
+                while (true) {
+                    respuesta = in.readUTF();
+                    zonaChat.append(respuesta + "\n");
+                }
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+        }).start();
+
     }
 }
