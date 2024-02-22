@@ -6,15 +6,16 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-
-public class Usuario extends JFrame {
-    static String nombre;
+public class Usuario extends JFrame{
     private static DataOutputStream out;
     private static DataInputStream in;
     private static JTextArea zonaChat;
     private JTextField zonaTexto;
-    public Usuario (String name){
-        setTitle("WhatsApp: "+name);
+    static String nombre;
+    static String nombreFinal;
+
+    public Usuario(String name) {
+        setTitle("WhatsApp de "+ name);
         setSize(400, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -40,7 +41,6 @@ public class Usuario extends JFrame {
                 }
             }
         });
-
         panelChat.add(boton, BorderLayout.EAST);
 
         panel.add(panelChat, BorderLayout.SOUTH);
@@ -56,8 +56,9 @@ public class Usuario extends JFrame {
         in = new DataInputStream(socket.getInputStream());
 
         nombre = JOptionPane.showInputDialog("Escribe tu nombre");
-
-        new Usuario(nombre);
+        out.writeUTF(nombre);
+        nombreFinal = in.readUTF();
+        new Usuario(nombreFinal);
 
         new Thread(() -> {
             try {
@@ -70,6 +71,5 @@ public class Usuario extends JFrame {
                 System.out.println(e.getMessage());
             }
         }).start();
-
     }
 }
