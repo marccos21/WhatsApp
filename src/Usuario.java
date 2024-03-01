@@ -60,16 +60,10 @@ public class Usuario extends JFrame{
         nombreFinal = in.readUTF();
         new Usuario(nombreFinal);
 
-        new Thread(() -> {
-            try {
-                String respuesta;
-                while (true) {
-                    respuesta = in.readUTF();
-                    zonaChat.append(respuesta + "\n");
-                }
-            } catch (IOException e) {
-                System.out.println(e.getMessage());
-            }
-        }).start();
+        String respuesta;
+        while (true) {
+            respuesta = in.readUTF();
+            zonaChat.append(respuesta + "\n");
+        }
     }
 }
